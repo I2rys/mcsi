@@ -1,41 +1,32 @@
-//Dependencies
-const Request = require("request")
-const Chalk = require("chalk")
+(async()=>{
+    "use strict";
 
-//Variables
-const Self_Args = process.argv.slice(2)
+    // Dependencies
+    const request = require("request-async")
 
-//Main
-if(Self_Args.length == 0){
-    console.log(`node index.js <mcserver_ip>
-Example: node index.js play.jartexnetwork.com`)
+    // Variables
+    const args = process.argv.slice(2)
+
+    // Main
+    if(!args.length) return console.log("usage: node index.js <serverIP>")
+
+    var response = await request(`https://api.mcsrvstat.us/2/${args[0]}`)
+    response = JSON.parse(response.body)
+
+    if(!response.online) return console.log("Unable to get the server information.")
+
+    console.log(`
+Server IP: ${args[0]}
+Server Name: ${response.hostname}
+Server Port: ${response.port}
+Server Protocol: ${response.protocol}
+Server Icon: ${response.icon}
+Server Version: ${response.version}
+Server Software: ${response.software}
+
+Players Online: ${response.players.online}
+Players Max: ${response.players.max}
+
+Is Server Online: ${response.online}`)
     process.exit()
-}
-
-Request(`https://api.mcsrvstat.us/2/${Self_Args[0]}`, function(err, res, body){
-    if(err){
-        console.log(`${Chalk.grey("[") + Chalk.redBright("ERROR") + Chalk.grey("]")} Something went wrong while requesting to the API, please try again later.`)
-        process.exit()
-    }
-    
-    body = JSON.parse(body)
-
-    if(body.hostname == undefined){
-        console.log(`${Chalk.grey("[") + Chalk.redBright("ERROR") + Chalk.grey("]")} Unable to get the server information.`)
-        process.exit()
-    }
-
-    console.log(Chalk.greenBright(`Server IP: ${Self_Args[0]}
-Server Name: ${body.hostname}
-Server Port: ${body.port}
-Server Protocol: ${body.protocol}
-Server Icon: ${body.icon}
-Server Version: ${body.version}
-Server hoster: ${body.software}
-
-Players Online: ${body.players.online}
-Players Max: ${body.players.max}
-
-Is Server Online: ${body.online}`))
-    process.exit()
-})
+})()
